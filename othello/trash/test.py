@@ -17,26 +17,23 @@ un state min ou un state max """
 
 
 """comment je fais pour garder en mémoire les boards et pas changer le plateau initial ?"""
-
-"""2 problemes : 1/ l'utilisation de fonction d'othello dans la classe player
-                 2/ la mise en mémoire des plateaux pendant que l'algo tourne"""
 class IAplayer(Player):
     def __init__(self,Jside):
         self.Jside = Jside
 
     def pick_move():
-        return minmax()
+        return minmax
+#minmax 
+    def minmax(self,game, side, depth):
 
-    def minmax(self,board, side, depth):
-
-        if board == self.terminal_board(board) or depth == 0:
-            return self.evaluation_function(board)
+        if game.board == self.terminal_board(game.board) or depth == 0:
+            return self.evaluation_function(game.board)
 
         else:
             if self.Jside == side:
                 gain = -10000
-                for move in self.possible_moves(side):  
-                    self.play_move(move[0],move[1],side)
+                for move in game.possible_moves(side):
+                    game.play_move(move[0],move[1],side) #on veut jouer se coup dans un plateau virtuel !!!
                     gain = max(gain, self.minmax(self,next_board, -side, depth-1) )
                     return gain     #le max de ce qui nous est proposé
             else:

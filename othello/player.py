@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from othello import Othello
 import random
+from minmax_by_function import minmax
 
 class Player(ABC):
  
@@ -41,3 +42,12 @@ class HumanPlayer(Player):
                 print("Please input a valid move")
         return move
             
+
+class IAplayer(Player):
+    def __init__(self,playerSide, depth = 3):
+        self.playerSide = playerSide
+        self.depth = depth
+
+    def pick_move(self, game, side):
+        move = minmax(game,self.playerSide,self.depth)
+        return move

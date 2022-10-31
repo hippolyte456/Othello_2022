@@ -25,10 +25,8 @@ def play_game(game,joueur1, joueur2):
 
 
 
-
-
 if __name__ == '__main__':
-    joueur1 = player.RandomPlayer()
-    joueur2 = player.RandomPlayer()
+    joueur1 = player.HumanPlayer()
+    joueur2 = player.IAplayer(playerSide= -1)
     play_game(Othello,joueur1,joueur2)
    
