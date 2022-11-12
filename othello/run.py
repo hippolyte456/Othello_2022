@@ -14,6 +14,7 @@ def play_game(game,joueur1, joueur2):
         if game.possible_moves(side) != []:
             x,y = joueurs[currentPlayer].pick_move(game,side)
             game.play_move(x,y,side)
+            game.print_board()
             tour += 1
             currentPlayer = 1 - currentPlayer
             side = - side
@@ -26,7 +27,8 @@ def play_game(game,joueur1, joueur2):
 
 
 if __name__ == '__main__':
-    joueur1 = player.HumanPlayer()
-    joueur2 = player.IAplayer(playerSide= -1)
+    #joueur1 = player.HumanPlayer()
+    joueur1 = player.RandomPlayer()
+    joueur2 = player.IAplayer(Jside= -1)
     play_game(Othello,joueur1,joueur2)
    

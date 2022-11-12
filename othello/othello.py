@@ -85,8 +85,13 @@ class Othello(object):
             self.board[tx, ty] = side
             tx += dx
             ty += dy
-        
-    def print_board(self):
+    
+    def count_pieces(self,side):
+        return np.sum(self.board)*side
+
+
+    #a remplacer par une fonction qui prend un objet tkinter en entrée et qui met à jour cet objet avec la board actuel
+    def print_board(self):  
         print("   ", end="")
         for i in range(8):
             print("%2d" % (i) , end="")
