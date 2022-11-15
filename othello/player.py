@@ -1,8 +1,28 @@
+
+#des questions que je me suis posé... à garder en tête pour être moins bête la prochaine fois 
+
+"""pour optimiser le cout en mémoire, il ne faut pas charger tous les plateaux, mais chargé un seul plateau virtuel ainsi 
+que les mouvements nécessaires pour passer d'un noeud à l'autre... et une fonction qui transforme le plateau virtuel au 
+plateau suivant"""
+
+"""une bonne façon d'écrire le programme serait de créer une classe node = un plateau, un state terminal ou non,
+un state min ou un state max """
+
+"""plus generalement : comment mon objet aiplayer doit interagir avec Othello"""
+
+"""comment je fais pour garder en mémoire les boards et pas changer le plateau initial ?"""
+
+"""2 problemes : 1/ l'utilisation de fonction d'othello dans la classe player
+                 2/ la mise en mémoire des plateaux pendant que l'algo tourne"""
+
+
 from othello import Othello
+from run import compare_algo
+
 import random
 import numpy as np
 from copy import deepcopy
-
+from time import time
     
 class RandomPlayer():  
     
@@ -37,33 +57,12 @@ class HumanPlayer():
             
 
 
-'''question : comment on fait pour donner les moves possibles à minmax? il ne faut pas faire d'héritage multiple à priori
-par contre le minmax est exécuté par un player qui a un side précis, donc on sait quand on est dans un noeud max ou min
- en appelant le side  avec self'''
-
-"""pour optimiser le cout en mémoire, il ne faut pas charger tous les plateaux, mais chargé un seul plateau virtuel ainsi 
-que les mouvements nécessaires pour passer d'un noeud à l'autre... et une fonction qui transforme le plateau virtuel au 
-plateau suivant"""
-
-"""une bonne façon d'écrire le programme serait de créer une classe node = un plateau, un state terminal ou non,
-un state min ou un state max """
-
-"""plus generalement : comment mon objet aiplayer doit interagir avec Othello"""
-
-
-"""comment je fais pour garder en mémoire les boards et pas changer le plateau initial ?"""
-
-"""2 problemes : 1/ l'utilisation de fonction d'othello dans la classe player
-                 2/ la mise en mémoire des plateaux pendant que l'algo tourne"""
-
 class IAplayer():
     
-    def __init__(self,Jside, depth = 3, x1 = 1, x2 = 1, x3 = 1):
+    def __init__(self,Jside = 1, param = np.array([1,1,1]), depth = 1):
         self.Jside = Jside
         self.depth = depth
-        self.x1 = x1
-        self.x2 = x2
-        self.x3 = x3
+        self.param = param
     
 
     def pick_move(self, game, side):
@@ -110,9 +109,25 @@ class IAplayer():
         mobilite = len(game.possible_moves(self.Jside)) - len(game.possible_moves(-self.Jside))
         materiel = game.count_pieces(self.Jside)
         coins = 0
-        a = self.x1*mobilite + self.x2*materiel + self.x2*coins
-        #print(a)
+        a = self.param[0]*mobilite + self.param[1]*materiel + self.param[2]*coins
         return a
+
+
+    '''fonction pour optimiser les paramètres de la fonction d'evaluation... ne fonctionne pas '''
+    def train(self):
+        ia = IAplayer(param = np.array([0,0,0]))
+        while compare_algo(Othello,self,ia,10) > 50:
+            ia = IAplayer(param = self.param)
+            self.param = self.param + np.array([1,0,0])
+            print('xxx' ,self.param)
+        ia = IAplayer(param = np.array([0,0,0]))
+        while compare_algo(Othello,self,ia,10) >= 50:
+            ia = IAplayer(param = self.param)
+            self.param = self.param + np.array([0,0,1])
+            print('zzz' ,self.param)
+            
+            
+
 
 
 '''
@@ -121,3 +136,71 @@ option possibles pour les differents IA :
 et parametres de fonctions differnets)
 -soit on fait plusieurs classes differentes
 ''' 
+
+'''
+class IAplayer_MCTS():
+    
+    def __init__(self,Jside = 1, param = np.array([1,1,1]), depth = 1):
+        self.Jside = Jside
+        self.depth = depth
+        self.param = param
+    
+
+    def pick_move(self, game, side):
+        gain, move = self.MCTS(game, side, self.depth)
+        return move
+
+
+    def MCTS(self,game,Playtime):
+        execStart = time()
+        currentExec = time()
+        execTime = currentExec - execStart
+        estimated_nodes = [game,1,0,None] #une liste de node de la forme [game, estim_value, numberOfVisit, noeuds_fils_visités]
+        while execTime < Playtime:
+            leaf = traverse(estimated_nodes)
+            simulation_result = rollout(leaf)
+            backpropagate(leaf, simulation_result)
+            execTime = currentExec - execStart
+            
+            
+        return best_child(root)
+
+# function for node traversal
+def traverse(game,estimated_nodes):
+    if estimated_nodes[3] == None:
+        #createLeaf et rajouter à estimated_nodes
+    else:
+        UCT(estimated_nodes[3]) #retourne le meilleur des noeuds 
+        traverse(game,estimated_nodes[])
+
+    return all possibility of game.play_game()
+
+    
+    # while fully_expanded(node):
+    #     node = best_uct(node)
+        
+    # in case no children are present / node is terminal
+    return pick_unvisited(node.children) or node
+
+# function for the result of the simulation
+def rollout(game):
+    while non_terminal(node):
+        node = rollout_policy(node)
+    return result(node)
+
+# function for randomly selecting a child node
+def rollout_policy(node):
+    return pick_random(node.children)
+
+# function for backpropagation
+def backpropagate(node, result):
+    if is_root(node) return
+    node.stats = update_stats(node, result)
+    backpropagate(node.parent)
+
+# function for selecting the best child
+# node with highest number of visits
+def best_child(node):
+    pick child with highest number of visits
+
+'''
