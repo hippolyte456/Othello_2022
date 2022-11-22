@@ -19,11 +19,14 @@ class Othello(object):
         self.flip(x, y, side)
         
     def game_over(self):
-        for i in range(8):
-            for j in range(8):
-                if self.board[i,j] == 0 and (self.valid_flip(i,j, -1) or self.valid_flip(i,j, 1)):
-                    return False
-        return True
+        return (0 not in self.board)
+        # for i in range(8):
+        #     for j in range(8):
+        #         if self.board[i,j] == 0 and (self.valid_flip(i,j, -1) or self.valid_flip(i,j, 1)):
+        #             print("false" , 0 not in self.board)
+        #             return False
+        # print("true", 0 not in self.board)
+        # return True
     
     def get_winner(self):
         t = np.sum(self.board)
@@ -34,14 +37,19 @@ class Othello(object):
         return 0
     
     def possible_moves(self, side):
-        moves = []
-        for i in range(8):
-            for j in range(8):
-                if self.board[i,j] == 0 and self.valid_flip(i,j, side):
-                    moves.append((i, j))
-        return moves
+        return [ (i,j) for i in range(8) for j in range(8) if (self.board[i,j] == 0 and self.valid_flip(i,j, side))]
+        # moves = []
+        # for i in range(8):
+        #     for j in range(8):
+        #         if self.board[i,j] == 0 and self.valid_flip(i,j, side):
+        #             moves.append((i, j))
+        # return moves
     
     def valid_flip(self, x, y, side):
+
+        # return True if [self.valid_ray(x, y, side, dx, dy) for dx in range(-1,2) for dy in range (-1,2)] else False
+        # return False
+        # return True in [self.valid_ray(x, y, side, dx, dy) for dx in range(-1,2) for dy in range (-1,2)]
         for dx in range(-1, 2):
             for dy in range(-1, 2):
                 if dy == 0 and dx == 0:

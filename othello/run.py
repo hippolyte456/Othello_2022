@@ -4,7 +4,7 @@ import player
 from tkinter import *
 import tkinter.ttk as ttk
 from tkinter import messagebox
-
+import datetime
 
 class simulation():
 
@@ -140,6 +140,7 @@ class playing_with_tkinter_interface():
         self.welcome.geometry('%dx%d+%d+%d' % (570, 300, self.ws, 0))
 
     def get_simu(self):
+        self.now = datetime.datetime.now()
         options = self.nb_simu.get()
         cpt_black = 0
         cpt_white = 0
@@ -159,6 +160,7 @@ class playing_with_tkinter_interface():
                 Label(self.welcome, text="Player 1", font=("Arial 9 bold")).grid(column=1, row=16)
                 Label(self.welcome, text="Equality", font=("Arial 9 bold")).grid(column=3, row=16)
                 Label(self.welcome, text="Player 2", font=("Arial 9 bold")).grid(column=5, row=16)
+                print("TIME INITIAL", datetime.datetime.now() - self.now)
                 options -= 1
             # if  cpt_black > cpt_white :
             #     statement = 'Player 1 won ' + str(cpt_black) + ' VS ' + str(cpt_white) + ' (equality = ' + str(equality) + ')'
