@@ -3,6 +3,30 @@ from othello import Othello
 import player 
 from tkinter import *
 import tkinter.ttk as ttk
+from tkinter import messagebox
+
+
+class simulation():
+
+    def __init__(self, player1, player2) :
+        self.players = [player1, player2]
+        self.tour = 0
+        self.currentPlayer = 0
+        self.side = 1
+        self.game = Othello()
+
+    def play(self):
+        while (not self.game.game_over() and self.game.possible_moves(self.side) != []):
+            x, y = self.players[self.currentPlayer].pick_move(self.game, self.side) #get choice
+            self.game.play_move(x, y,self.side) # Update the board
+            self.tour += 1 # update tunr
+            self.currentPlayer = 1 - self.currentPlayer # Change player
+            self.side = - self.side
+            if not self.game.possible_moves(self.side) :
+                self.currentPlayer = 1 - self.currentPlayer # Change player
+                self.side = - self.side
+        return (sum(sum(self.game.board)))
+        
 
 class playing_with_tkinter_interface():
 
@@ -59,7 +83,7 @@ class playing_with_tkinter_interface():
 
         # List choices :
         CHOICE = ["Human", "Random", "MinMax", "Alpha-Beta", "MCTS"]
-
+        SIMULATION = [10, 20, 30, 40, 50]
 
         # PLAYER
         ### PLayer 1
@@ -97,10 +121,56 @@ class playing_with_tkinter_interface():
         bouton_close = Button(self.welcome, text="Exit", command = self.close_tkinter, bg = "red", fg = 'white')
         bouton_close.grid(column=6, row = 10, columnspan=1)
 
+        Label(self.welcome, text=" ", font=("Arial 17 bold")).grid(column = 0, row = 11)
+
+        # SIMULATION
+        ### PLayer 1
+        lplayer = Label(self.welcome, text="Simulation", font=("Arial 17 bold"))
+        lplayer.grid(column = 0, row = 12)
+
+        self.nb_simu = IntVar() #IntVar()
+        for i, rb_label in enumerate(SIMULATION):
+            rb_simu = ttk.Radiobutton(self.welcome, text=rb_label, value=rb_label, variable=self.nb_simu, command=self.get_simu)
+            rb_simu.grid(column = i + 1, row = 13)
+        
+        Label(self.welcome, text=" ", font=("Arial 17 bold")).grid(column = 0, row = 14)
+
+
         # LOCALISATION
-        self.welcome.geometry('%dx%d+%d+%d' % (500, 100, self.ws, 0))
+        self.welcome.geometry('%dx%d+%d+%d' % (570, 300, self.ws, 0))
 
+    def get_simu(self):
+        options = self.nb_simu.get()
+        cpt_black = 0
+        cpt_white = 0
+        equality = 0
+        if self.joueur1.auto and self.joueur2.auto :
+            while options :
+                result = simulation(self.joueur1, self.joueur2).play()
+                if result > 0:
+                    cpt_black += 1
+                elif result < 0:
+                    cpt_white += 1
+                else :
+                    equality += 0
+                Label(self.welcome, text=cpt_black, font=("Arial 9 bold")).grid(column=1, row=15)
+                Label(self.welcome, text=equality, font=("Arial 9 bold")).grid(column=3, row=15)
+                Label(self.welcome, text=cpt_white, font=("Arial 9 bold")).grid(column=5, row=15)
+                Label(self.welcome, text="Player 1", font=("Arial 9 bold")).grid(column=1, row=16)
+                Label(self.welcome, text="Equality", font=("Arial 9 bold")).grid(column=3, row=16)
+                Label(self.welcome, text="Player 2", font=("Arial 9 bold")).grid(column=5, row=16)
+                options -= 1
+            # if  cpt_black > cpt_white :
+            #     statement = 'Player 1 won ' + str(cpt_black) + ' VS ' + str(cpt_white) + ' (equality = ' + str(equality) + ')'
+            # elif cpt_black < cpt_white :
+            #     statement = 'Player 2 won ' + str(cpt_white) + ' VS ' + str(cpt_black) + ' (equality = ' + str(equality) + ')'
+            # else :
+            #     statement = 'Equality ' + str(cpt_black) + ' VS ' + str(cpt_white) 
+            # messagebox.showwarning(title=None, message=statement)
+            # self.lsimu = Label(self.welcome, text=statement, font=("Arial 9 bold"))
+            # self.lsimu.grid(row = 14)
 
+                
     def choice_player1(self):
         options = self.playerchoice1.get()
         if options == 0:
@@ -137,14 +207,16 @@ class playing_with_tkinter_interface():
         self.__init_variables()
         self.game.tkinter_board_init(self.canva)
         self.game.update_color(self.canva)
-
+        try :
+            self.winner.destroy()
+        except :
+            pass
 
     def close_tkinter(self):
         """
         Close the tkinter windows
         """
         self.windows.destroy()
-        # self.welcome.destroy()
 
     def mouse_click(self):
         self.posi = self.game.possible_moves(self.side)
@@ -159,7 +231,7 @@ class playing_with_tkinter_interface():
                 self.play_turn()
                 self.game.hide_legal_moves(self.posi, self.canva)
                 if self.joueurs[self.currentPlayer].auto :
-                    self.windows.after(100,self.player_manager)
+                    self.windows.after(10,self.player_manager)
                 else :
                     self.posi = self.game.possible_moves(self.side) # show legal move for next player
                     self.game.display_legal_moves(self.posi, self.canva)
@@ -179,7 +251,6 @@ class playing_with_tkinter_interface():
         if not self.stop :
             if self.human :
                 if not self.joueurs[0].auto :
-            # if not self.joueurs[self.currentPlayer].auto :
                     self.mouse_click()
                 else :
                     self.play_turn()
@@ -204,24 +275,26 @@ class playing_with_tkinter_interface():
         """
         self.posi = self.game.possible_moves(self.side)
         if self.posi != []: # Check if there is at least one valid move
-            # print(self.game.possible_moves(self.side))
-            # self.game.display_legal_moves(self.posi, self.canva)
             if self.joueurs[self.currentPlayer].auto :
                 self.x,self.y = self.joueurs[self.currentPlayer].pick_move(self.game, self.side)
-            # else :
-            #     self.x,self.y = self.joueurs[self.currentPlayer].move_from_tkinter(self.game, self.side, event)
             self.game.play_move(self.x,self.y,self.side) # Update the board
-            # self.game.hide_legal_moves(self.posi, self.canva)
             self.game.update_color(self.canva) # Update Tkinter objects
             self.tour += 1
             self.currentPlayer = 1 - self.currentPlayer # Change player
             self.side = - self.side
+            if not self.game.possible_moves(self.side) :
+                self.currentPlayer = 1 - self.currentPlayer # Change player
+                self.side = - self.side
+                if not self.joueurs[self.currentPlayer].auto : # Informe User about the change if he is human
+                    messagebox.showwarning(title=None, message=("Black" if self.currentPlayer == 1 else "white") + " can not play" + "\n" + \
+                    ("White" if self.currentPlayer == 1 else "Black") + " still playing")
         else: # If player cann't play, change player
             self.currentPlayer = 1 - self.currentPlayer 
             self.side = - self.side
-        if self.game.game_over() : # if it is the end
-            print('le joueur gagnant est le joueur' + str(int(1.5 - 0.5*self.game.get_winner())))
-
+        if self.game.game_over() or not self.game.possible_moves(self.side): # if it is the end
+            winner_statement = 'Equality !' if sum(sum(self.game.board)) == 0 else 'Player ' + ('white' if sum(sum(self.game.board)) < 0 else 'black') + ' won the game !'
+            self.winner = Label(self.windows, text=winner_statement, font=("Arial 17 bold"))
+            self.winner.pack()
 
 if __name__ == '__main__':
     # joueur1 = player.HumanPlayer()

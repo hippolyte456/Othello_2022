@@ -77,7 +77,7 @@ class HumanPlayer():
 
 class IAplayer():
     
-    def __init__(self,Jside = 1, param = np.array([1,1,1]), depth = 1):
+    def __init__(self,Jside = 1, param = np.array([1,1,1]), depth = 3):
         self.Jside = Jside
         self.depth = depth
         self.param = param
