@@ -91,6 +91,56 @@ class Othello(object):
 
 
     #a remplacer par une fonction qui prend un objet tkinter en entrée et qui met à jour cet objet avec la board actuel
+    def tkinter_board_init(self, canva):
+        """
+            input : tkinter windows & bord
+        """
+        # Display square on the windows
+        self.color_square = ['green','DarkSeaGreen3']
+        self.color_oval = ['black','white']
+        self.tkn_lst = []
+        self.oval_lst = []
+        i = 0
+        while i <= 8 :
+            j = 0
+            while j <= 8 :
+                canva.create_rectangle(i * 100, j * 100, i * 100 + 100, j * 100 + 100, fill = self.color_square[(i + j) % 2])
+                token = canva.create_oval(i * 100 + 5, j * 100 + 5, i* 100 + 95 , j * 100 + 95, fill = self.color_square[(i + j) % 2], outline="")
+                oval = canva.create_oval(i * 100 + 40, j * 100 + 40, i * 100 + 60, j * 100 + 60, fill = self.color_square[(i + j) % 2], outline="")
+                self.tkn_lst.append(token)
+                self.oval_lst.append(oval)
+                j += 1
+            i += 1
+    
+    def display_legal_moves(self, coor, canva):
+        for (i,j) in coor:
+            canva.itemconfig(self.oval_lst[j * 9 + i], fill= 'yellow')
+
+    def hide_legal_moves(self, coor, canva):
+        for (i,j) in coor:
+            if (self.board[i ,j] == 1) :
+                canva.itemconfig(self.oval_lst[j * 9 + i], fill= 'black', outline="")
+            elif (self.board[i ,j] == -1) :
+                canva.itemconfig(self.oval_lst[j * 9 + i], fill= 'white', outline="")
+            else :
+                canva.itemconfig(self.oval_lst[j * 9 + i], fill= self.color_square[(i + j) % 2], outline="")
+
+    def update_color(self, canva):
+        i = 0
+        # print(self.board)
+        while i < 8 :
+            j = 0
+            while j < 8 :
+                # print((i, j), self.board[j ,i], i * 8 + j)
+                if (self.board[j ,i] == 1) :
+                    canva.itemconfig(self.tkn_lst[i * 9 + j], fill= 'black')
+                    canva.itemconfig(self.oval_lst[i * 9 + j], fill= 'black', outline="")
+                elif (self.board[j ,i] == -1) :
+                    canva.itemconfig(self.tkn_lst[i * 9 + j], fill= 'white')
+                    canva.itemconfig(self.oval_lst[i * 9 + j], fill= 'white', outline="")
+                j += 1
+            i += 1
+
     def print_board(self):  
         print("   ", end="")
         for i in range(8):

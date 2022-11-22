@@ -17,15 +17,18 @@ un state min ou un state max """
 
 
 from othello import Othello
-from run import compare_algo
 
 import random
 import numpy as np
 from copy import deepcopy
 from time import time
-    
+from math import *
+
 class RandomPlayer():  
     
+    def __init__(self) :
+        self.auto = True
+
     def pick_move(self, game, side):
         t = game.possible_moves(side)
         if len(t) == 0:
@@ -34,7 +37,22 @@ class RandomPlayer():
         return (t[r][0], t[r][1])
     
 class HumanPlayer(): 
-    
+
+    def __init__(self) :
+        self.auto = False
+
+
+    def move_from_tkinter(self, game, side, event):
+        t = game.possible_moves(side)
+        if len(t) == 0:
+            print("No moves availible. Turn skipped.") #message boxe
+            return (-1, -1)
+        y = floor(event.x / 100)
+        x = floor(event.y / 100)
+        if (x, y) in t :
+            return (x, y)
+        return (-1, -1)
+
     def pick_move(self, game, side):
         game.print_board()
         print("You are playing", Othello.piece_map(side))
@@ -63,6 +81,7 @@ class IAplayer():
         self.Jside = Jside
         self.depth = depth
         self.param = param
+        self.auto = True    
     
 
     def pick_move(self, game, side):
