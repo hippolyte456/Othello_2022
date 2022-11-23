@@ -1,225 +1,181 @@
-
-#des questions que je me suis posé... à garder en tête pour être moins bête la prochaine fois 
-
-"""pour optimiser le cout en mémoire, il ne faut pas charger tous les plateaux, mais chargé un seul plateau virtuel ainsi 
-que les mouvements nécessaires pour passer d'un noeud à l'autre... et une fonction qui transforme le plateau virtuel au 
-plateau suivant"""
-
-"""une bonne façon d'écrire le programme serait de créer une classe node = un plateau, un state terminal ou non,
-un state min ou un state max """
-
-"""plus generalement : comment mon objet aiplayer doit interagir avec Othello"""
-
-"""comment je fais pour garder en mémoire les boards et pas changer le plateau initial ?"""
-
-"""2 problemes : 1/ l'utilisation de fonction d'othello dans la classe player
-                 2/ la mise en mémoire des plateaux pendant que l'algo tourne"""
-
-
 from othello import Othello
-
+from time import sleep
+from copy import deepcopy, copy
+from time import time
+from run import simulation
+from math import *
 import random
 import numpy as np
-from copy import deepcopy
-from time import time
-from math import *
 
-class RandomPlayer():  
+
+class RandomPlayer():
+    """
+    Random player will get a random move from the valid moves list
+    """
     
     def __init__(self) :
-        self.auto = True
+        self.auto = True # Inform about that it is a automatic player
 
-    def pick_move(self, game, side):
-        t = game.possible_moves(side)
-        if len(t) == 0:
-            return (-1, -1)
-        r = random.randint(0, len(t)-1)
-        return (t[r][0], t[r][1])
+    def pick_move(self, game) -> list:
+        r = random.randint(0, len(game.moves)-1)
+        return (game.moves[r][0], game.moves[r][1])
     
 class HumanPlayer(): 
-
+    """
+    Human player will get the choice of the user thank to a click.
+    It will check if this click is in the legal move before otherwise it return an impossible position (-1, -1)
+    """
+    
     def __init__(self) :
-        self.auto = False
+        self.auto = False # Inform that it is not a automatic player
 
-
-    def move_from_tkinter(self, game, side, event):
+    def move_from_tkinter(self, game : object, side : int, event : enumerate, size : int) -> list:
         t = game.possible_moves(side)
         if len(t) == 0:
-            print("No moves availible. Turn skipped.") #message boxe
             return (-1, -1)
-        y = floor(event.x / 100)
-        x = floor(event.y / 100)
+        y = floor(event.x / size)
+        x = floor(event.y / size)
         if (x, y) in t :
             return (x, y)
         return (-1, -1)
-
-    def pick_move(self, game, side):
-        game.print_board()
-        print("You are playing", Othello.piece_map(side))
-        t = game.possible_moves(side)
-        if len(t) == 0:
-            print("No moves availible. Turn skipped.")
-            return (-1, -1)
-        move = (-1, -1)
-        while move not in t:
-            try:
-                row = int(input("Please input row: "))
-                col = int(input("Please input col: "))
-                move = (row, col)
-                if move not in t:
-                    game.print_board()
-                    print("Please input a valid move")
-            except Exception:
-                print("Please input a valid move")
-        return move
             
+class dummy_evaluation_player():
+    """
+    Take a game an evaluate a ratio :
+    ratio = gain / risk
+    Thanks to a density map provided during the course
+    we will go through the border and each square accessible from an enemy piece will be a potential gain,
+    conversely any square of the considered player will be a potential risk.
+    Gain = P(last move) + Sum(P(player_opportunity_on_border)i)
+    Risk = Sum(P(ennemy_opportunity_on_border)i)
 
-
-class IAplayer():
-    
-    def __init__(self,Jside = 1, param = np.array([1,1,1]), depth = 3):
-        self.Jside = Jside
+    Better than random [80-90]%
+    """
+    def __init__(self, depth = 1):
         self.depth = depth
-        self.param = param
-        self.auto = True    
-    
+        self.auto = True
 
-    def pick_move(self, game, side):
-        gain, move = self.minmax(game, side, self.depth)
-        return move
+    def pick_move(self, game) -> list :
+        self.density_map = np.array([[120,-20,20,5,5,20,-20,120],
+                       [-20,-30,-5,-5,-5,-5,-30,-20],
+                       [20 ,-5 ,15,3,3,15,-5,20],
+                       [5  ,-5 ,3,3,3,3,-5,5],
+                       [5  ,-5 ,3,3,3,3,-5,5],
+                       [20 ,-5 ,15,3,3,15,-5,20],
+                       [-20,-30,-5,-5,-5,-5,-30,-20],
+                       [120,-20,20,5,5,20,-20,120]])
+        ret = -10000
+        for move in game.moves:
+            new_game = simulation(deepcopy(game.players[0]),deepcopy(game.players[1]), deepcopy(game.game.board), game.side)
+            new_game.play_one_turn(move[0], move[1])
+            ratio = self.evaluation_board(new_game, move[0], move[1])
+            if ratio > ret :
+                ret = ratio
+                ret_move = move
+        return ret_move
 
+    def evaluation_board(self, game, x : int, y : int) -> int :
+        gain = self.density_map[x,y] * 2
+        risk = 0
+        for i in range(7):
+            for j in range(7):
+                if game.game.board[i,j] == -game.side:
+                    risk += max(self.check_neighborhood(game, i, j))
+                elif game.game.board[i,j] == game.side :
+                    gain += max(self.check_neighborhood(game, i, j))
+        if risk == 0 :
+            return (gain/1)
+        elif gain < 0:
+            return (-1000)
+        elif risk < 0 and gain > 0:
+            return ((gain / -(1/risk)))
+        return ((gain/risk))
 
-    def minmax(self,game, side, depth):
+    def check_neighborhood(self, game, i : int, j : int) -> None:
+        tot = [0]
+        for dx in range(i-1,i+2):
+            for dy in range(j-1,j+2):
+                if game.game.board[dx,dy] == 0:
+                    tot.append(self.density_map[dx,dy])
+        return tot  
 
-        if game.game_over() or depth == 0:
-            return self.evaluation_function(game), (-1,-1)
-
-        else:
-            if self.Jside == side:
-                Bgain = -10000
-                Bmove = (-1,-1)              
-                for move in game.possible_moves(side):
-                    next_board = deepcopy(game)
-                    next_board.play_move(move[0],move[1],side)
-                    #print('aaaah', side ,depth)
-                    yMM  = self.minmax(next_board, -side, depth-1) 
-                    #print(yMM)
-                    gain, _ = yMM[0], yMM[1]
-                    if gain > Bgain:
-                        Bmove = move 
-                        Bgain = gain 
-                return Bgain, Bmove    #le max de ce qui nous est proposé
-            else:
-                Wgain = 10000
-                Wmove = (-1,-1)
-                for move in game.possible_moves(side): 
-                    next_board = deepcopy(game)
-                    next_board.play_move(move[0],move[1],side)
-                    #print('ooooh' ,side, depth)
-                    gain, _ = self.minmax(next_board, -side, depth-1)
-                    if gain < Wgain:
-                        Wmove = move 
-                        Wgain = gain 
-                return Wgain,Wmove      #le min de ce qui nous est proposé
-
-             
-    
-    def evaluation_function(self,game):
-        mobilite = len(game.possible_moves(self.Jside)) - len(game.possible_moves(-self.Jside))
-        materiel = game.count_pieces(self.Jside)
-        coins = 0
-        a = self.param[0]*mobilite + self.param[1]*materiel + self.param[2]*coins
-        return a
-
-
-    '''fonction pour optimiser les paramètres de la fonction d'evaluation... ne fonctionne pas '''
-    def train(self):
-        ia = IAplayer(param = np.array([0,0,0]))
-        while compare_algo(Othello,self,ia,10) > 50:
-            ia = IAplayer(param = self.param)
-            self.param = self.param + np.array([1,0,0])
-            print('xxx' ,self.param)
-        ia = IAplayer(param = np.array([0,0,0]))
-        while compare_algo(Othello,self,ia,10) >= 50:
-            ia = IAplayer(param = self.param)
-            self.param = self.param + np.array([0,0,1])
-            print('zzz' ,self.param)
-            
-            
-
-
-
-'''
-option possibles pour les differents IA : 
--soit la class peut prendre des attributs differents selon l'ia a generer (fonctions differentes 
-et parametres de fonctions differnets)
--soit on fait plusieurs classes differentes
-''' 
-
-'''
-class IAplayer_MCTS():
-    
-    def __init__(self,Jside = 1, param = np.array([1,1,1]), depth = 1):
-        self.Jside = Jside
-        self.depth = depth
-        self.param = param
-    
-
-    def pick_move(self, game, side):
-        gain, move = self.MCTS(game, side, self.depth)
-        return move
-
-
-    def MCTS(self,game,Playtime):
-        execStart = time()
-        currentExec = time()
-        execTime = currentExec - execStart
-        estimated_nodes = [game,1,0,None] #une liste de node de la forme [game, estim_value, numberOfVisit, noeuds_fils_visités]
-        while execTime < Playtime:
-            leaf = traverse(estimated_nodes)
-            simulation_result = rollout(leaf)
-            backpropagate(leaf, simulation_result)
-            execTime = currentExec - execStart
-            
-            
-        return best_child(root)
-
-# function for node traversal
-def traverse(game,estimated_nodes):
-    if estimated_nodes[3] == None:
-        #createLeaf et rajouter à estimated_nodes
-    else:
-        UCT(estimated_nodes[3]) #retourne le meilleur des noeuds 
-        traverse(game,estimated_nodes[])
-
-    return all possibility of game.play_game()
-
-    
-    # while fully_expanded(node):
-    #     node = best_uct(node)
         
-    # in case no children are present / node is terminal
-    return pick_unvisited(node.children) or node
+class DensityMinMax():
+    """
+    Logic min_max algorithme with a density map as an evaluation function.
+    Better than random but weak against dummy_evaluation.
+    Maybe be increasing depth it could win but the evaluation function doesn't seem good
+    """
 
-# function for the result of the simulation
-def rollout(game):
-    while non_terminal(node):
-        node = rollout_policy(node)
-    return result(node)
+    def __init__(self, depth : int = 2) -> None:
+        self.depth = depth    
+        self.auto = True
 
-# function for randomly selecting a child node
-def rollout_policy(node):
-    return pick_random(node.children)
+    def pick_move(self, game) -> tuple :
+        gain, move = self.minmax(game, self.depth, game.side)
+        return move
 
-# function for backpropagation
-def backpropagate(node, result):
-    if is_root(node) return
-    node.stats = update_stats(node, result)
-    backpropagate(node.parent)
+    def minmax(self, game, depth : int , maximizingplayer  : int, x : int = -1, y : int = -1) -> tuple :
+        if depth == 0 or game.moves == [] :
+            return self.evaluation_function(game, maximizingplayer, x, y), (-1, -1)
+        
+        if game.side == maximizingplayer :
+            value = 100000
+            Bmove = (-1,-1)   
+            for move in game.moves :
+                new_game = simulation(game.players[0],game.players[1], deepcopy(game.game.board), game.side)
+                new_game.play_one_turn(move[0], move[1])
+                yMM = self.minmax(new_game, depth-1, maximizingplayer, move[0], move[1])
+                gain, _ = yMM[0], yMM[1]
+                if gain < value :
+                    value = gain
+                    Bmove = move
+        else :
+            value = -10000000
+            Bmove = (-1,-1)   
+            for move in game.moves :
+                new_game = simulation(game.players[0],game.players[1], deepcopy(game.game.board), game.side)
+                new_game.play_one_turn(move[0], move[1])
+                yMM = self.minmax(new_game, depth-1, maximizingplayer, move[0], move[1])
+                gain, _ = yMM[0], yMM[1]
+                if gain > value :
+                    value = gain
+                    Bmove = move
+        
+        return value, Bmove
 
-# function for selecting the best child
-# node with highest number of visits
-def best_child(node):
-    pick child with highest number of visits
+    
+    def check_neighborhood(self, game, i : int, j : int) -> int:
+        tot = [0]
+        for dx in range(i-1,i+2):
+            for dy in range(j-1,j+2):
+                if game.game.board[dx,dy] == 0:
+                    tot.append(self.density_map[dx,dy])
+        return tot               
 
-'''
+    def evaluation_function(self, game, maximizingplayer, x = -1, y = -1):
+        self.density_map = np.array([[120,-20,20,5,5,20,-20,120],
+                       [-20,-30,-5,-5,-5,-5,-30,-20],
+                       [20 ,-5 ,15,3,3,15,-5,20],
+                       [5  ,-5 ,3,3,3,3,-5,5],
+                       [5  ,-5 ,3,3,3,3,-5,5],
+                       [20 ,-5 ,15,3,3,15,-5,20],
+                       [-20,-30,-5,-5,-5,-5,-30,-20],
+                       [120,-20,20,5,5,20,-20,120]])
+        risk = 0 
+        gain = 0
+        for i in range(7):
+            for j in range(7):
+                if game.game.board[i,j] == -maximizingplayer:
+                    risk += max(self.check_neighborhood(game, i, j))
+                    # gain += self.density_map[i,j]
+                elif game.game.board[i,j] == maximizingplayer :
+                    gain += max(self.check_neighborhood(game, i, j))
+                    # risk += self.density_map[i,j]
+        if risk == 0 :
+            return (100)
+        elif risk < 0 and gain < 0:
+            return ((gain/risk))
+        elif risk < 0 and gain > 0:
+            return ((gain / -(1/risk)))
+        return ((gain/risk))
