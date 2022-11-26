@@ -213,9 +213,9 @@ class game_manager():
             self.player1 = minmax.RandomPlayer()
         elif options == 2:
             # self.player1 = minmax.MinMax(3)
-            self.player1 = alpha_beta.NegaMax(2)
+            self.player1 = alpha_beta.Alpha_Beta(4)
         elif options == 3:
-            self.player1 = alpha_beta.Alpha_Beta(2)
+            self.player1 = alpha_beta.PrincipalVariationSearch(4)
         else :
             self.player1 = minmax.dummy_evaluation_player() # Still in progress : just minmax for the moment
         self.setup_player()
@@ -234,9 +234,9 @@ class game_manager():
             self.player2 = minmax.RandomPlayer()
         elif options == 2:
             # self.player2 = minmax.MinMax(3)
-            self.player2 = alpha_beta.NegaMax(2)
+            self.player2 = alpha_beta.Alpha_Beta(4)
         elif options == 3:
-            self.player2 = alpha_beta.Alpha_Beta(2)
+            self.player2 = alpha_beta.PrincipalVariationSearch(4)
         else :
             self.player2 = minmax.dummy_evaluation_player(depth = 3) # Still in progress : just minmax for the moment
         self.setup_player()
