@@ -1,11 +1,9 @@
-from othello import Othello
-from time import sleep
 from copy import deepcopy, copy
-from time import time
 from run import simulation
 from math import *
 import random
 import numpy as np
+import evaluation
 
 
 class RandomPlayer():
@@ -100,11 +98,10 @@ class dummy_evaluation_player():
         return tot  
 
         
-class DensityMinMax():
+class MinMax():
     """
-    Logic min_max algorithme with a density map as an evaluation function.
-    Better than random but weak against dummy_evaluation.
-    Maybe be increasing depth it could win but the evaluation function doesn't seem good
+    heuristics take into account the mobility, coin parity, stability and corners-captured
+    Not good against random but pretty good against density, dummy function is still better ...
     """
 
     def __init__(self, depth : int = 2) -> None:
@@ -112,70 +109,37 @@ class DensityMinMax():
         self.auto = True
 
     def pick_move(self, game) -> tuple :
-        gain, move = self.minmax(game, self.depth, game.side)
+        newgame = simulation(game.players[0],game.players[1], deepcopy(game.game.board), game.side)
+        gain, move = self.minmax(newgame, self.depth, game.side)
         return move
 
     def minmax(self, game, depth : int , maximizingplayer  : int, x : int = -1, y : int = -1) -> tuple :
         if depth == 0 or game.moves == [] :
-            return self.evaluation_function(game, maximizingplayer, x, y), (-1, -1)
+            return evaluation.full_evaluation(game, maximizingplayer, x, y), (-1, -1)
         
         if game.side == maximizingplayer :
-            value = 100000
+            value = 1000000000
             Bmove = (-1,-1)   
             for move in game.moves :
-                new_game = simulation(game.players[0],game.players[1], deepcopy(game.game.board), game.side)
-                new_game.play_one_turn(move[0], move[1])
-                yMM = self.minmax(new_game, depth-1, maximizingplayer, move[0], move[1])
+                game.play_one_turn(move[0], move[1])
+                fliped = game.game.fliped
+                yMM = self.minmax(game, depth-1, maximizingplayer, move[0], move[1])
+                game.side = game.game.unmake_move(fliped, move[0], move[1], game.side)
                 gain, _ = yMM[0], yMM[1]
                 if gain < value :
                     value = gain
                     Bmove = move
         else :
-            value = -10000000
+            value = -1000000000
             Bmove = (-1,-1)   
             for move in game.moves :
-                new_game = simulation(game.players[0],game.players[1], deepcopy(game.game.board), game.side)
-                new_game.play_one_turn(move[0], move[1])
-                yMM = self.minmax(new_game, depth-1, maximizingplayer, move[0], move[1])
+                game.play_one_turn(move[0], move[1])
+                fliped = game.game.fliped
+                yMM = self.minmax(game, depth-1, maximizingplayer, move[0], move[1])
+                game.side = game.game.unmake_move(fliped, move[0], move[1], game.side)
                 gain, _ = yMM[0], yMM[1]
                 if gain > value :
                     value = gain
                     Bmove = move
         
         return value, Bmove
-
-    
-    def check_neighborhood(self, game, i : int, j : int) -> int:
-        tot = [0]
-        for dx in range(i-1,i+2):
-            for dy in range(j-1,j+2):
-                if game.game.board[dx,dy] == 0:
-                    tot.append(self.density_map[dx,dy])
-        return tot               
-
-    def evaluation_function(self, game, maximizingplayer, x = -1, y = -1):
-        self.density_map = np.array([[120,-20,20,5,5,20,-20,120],
-                       [-20,-30,-5,-5,-5,-5,-30,-20],
-                       [20 ,-5 ,15,3,3,15,-5,20],
-                       [5  ,-5 ,3,3,3,3,-5,5],
-                       [5  ,-5 ,3,3,3,3,-5,5],
-                       [20 ,-5 ,15,3,3,15,-5,20],
-                       [-20,-30,-5,-5,-5,-5,-30,-20],
-                       [120,-20,20,5,5,20,-20,120]])
-        risk = 0 
-        gain = 0
-        for i in range(7):
-            for j in range(7):
-                if game.game.board[i,j] == -maximizingplayer:
-                    risk += max(self.check_neighborhood(game, i, j))
-                    # gain += self.density_map[i,j]
-                elif game.game.board[i,j] == maximizingplayer :
-                    gain += max(self.check_neighborhood(game, i, j))
-                    # risk += self.density_map[i,j]
-        if risk == 0 :
-            return (100)
-        elif risk < 0 and gain < 0:
-            return ((gain/risk))
-        elif risk < 0 and gain > 0:
-            return ((gain / -(1/risk)))
-        return ((gain/risk))

@@ -12,8 +12,18 @@ class Othello(object):
             self.board[3, 4] = -1
             self.board[4, 3] = -1
             self.board[4, 4] = 1
-      
-    def play_move(self, x : int, y: int, side: int) -> None:
+    
+    def unmake_move(self, fliped, x : int, y : int,  side : int) -> int:
+        """
+        Undo last move
+        return the last player
+        """
+        self.board[x, y] = 0
+        for tx, ty in fliped :
+            self.board[tx,ty] = -self.board[tx,ty]
+        return -side
+
+    def play_move(self, x : int, y : int, side : int) -> None:
         """
         Actualized the board if it is a real position
         """
@@ -21,6 +31,8 @@ class Othello(object):
             return
         self.board[x,y] = side
         self.flip(x, y, side)
+        self.x = x # Keep information for undo move
+        self.y = y
         
     def game_over(self) -> bool:
         """
@@ -84,6 +96,7 @@ class Othello(object):
         """
         Flip the position and then flip ray
         """
+        self.fliped = [] # will store all flipped tokens
         for dx in range(-1, 2) :
             for dy in range(-1, 2) :
                 if dy == 0 and dx == 0:
@@ -99,6 +112,7 @@ class Othello(object):
         ty = y + dy
         while self.board[tx, ty] != side:
             self.board[tx, ty] = side
+            self.fliped.append((tx, ty))
             tx += dx
             ty += dy
     
@@ -166,53 +180,53 @@ class Othello(object):
     #   TO REMOVE (but can be usefull for debugging)
     #
 
-    # def print_board(self):  
-    #     print("   ", end="")
-    #     for i in range(8):
-    #         print("%2d" % (i) , end="")
-    #     print("\n   ", end="")
-    #     for _ in range(16):
-    #         print("-", end="")
-    #     print("-")
-    #     for i in range(8):
-    #         print("%2d " % (i) , end="")
-    #         for j in range(8):
-    #             print("|" + Othello.piece_map(self.board[i,j]), end="")
-    #         print("|")
-    #         print("   ", end="")
-    #         for _ in range(16):
-    #             print("-", end="")
-    #         print("-")
+    def print_board(self):  
+        print("   ", end="")
+        for i in range(8):
+            print("%2d" % (i) , end="")
+        print("\n   ", end="")
+        for _ in range(16):
+            print("-", end="")
+        print("-")
+        for i in range(8):
+            print("%2d " % (i) , end="")
+            for j in range(8):
+                print("|" + Othello.piece_map(self.board[i,j]), end="")
+            print("|")
+            print("   ", end="")
+            for _ in range(16):
+                print("-", end="")
+            print("-")
     
-    # @staticmethod
-    # def piece_map(x):
-    #     return {
-    #         1: 'W',
-    #         -1: 'B',
-    #         0: ' ',
-    #     }[x]
+    @staticmethod
+    def piece_map(x):
+        return {
+            1: 'W',
+            -1: 'B',
+            0: ' ',
+        }[x]
         
-    # @staticmethod
-    # def move_id(move):
-    #     if move == (-1,-1):
-    #             return 64
-    #     return move[0]+move[1]*8
+    @staticmethod
+    def move_id(move):
+        if move == (-1,-1):
+                return 64
+        return move[0]+move[1]*8
     
-    # move_count = 65
+    move_count = 65
     
-    # def get_move(mid):
-    #     if mid == 64:
-    #         return (-1, -1)
-    #     x = mid%8
-    #     y = mid//8
-    #     return (x, y)
+    def get_move(mid):
+        if mid == 64:
+            return (-1, -1)
+        x = mid%8
+        y = mid//8
+        return (x, y)
            
-    # @staticmethod
-    # def state_id(board):
-    #     x = np.add(board, 1).flatten()
-    #     id = 0
-    #     mult = 1
-    #     for t in x:
-    #         id += mult*int(t)
-    #         mult *= 3
-    #     return id
+    @staticmethod
+    def state_id(board):
+        x = np.add(board, 1).flatten()
+        id = 0
+        mult = 1
+        for t in x:
+            id += mult*int(t)
+            mult *= 3
+        return id

@@ -1,4 +1,4 @@
-from player import Player
+from othello.minmax import Player
 from othello import Othello
 from copy import deepcopy
 

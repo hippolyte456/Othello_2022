@@ -1,4 +1,4 @@
-import player 
+import othello.minmax as minmax 
 import random as rd 
 import math
 

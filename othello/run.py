@@ -1,7 +1,8 @@
 from othello import Othello 
 from tkinter import *
 from tkinter import messagebox
-import player 
+import minmax
+import alpha_beta
 import tkinter.ttk as ttk
 import datetime
 import numpy as np
@@ -56,9 +57,10 @@ class game_manager():
     """
 
     def __init__(self) -> None :
+        self.now = datetime.datetime.now()
         self.windows = Tk() # Init tkinter windows
-        self.player1 = player.HumanPlayer() # By default players are humans
-        self.player2 = player.HumanPlayer()
+        self.player1 = minmax.HumanPlayer() # By default players are humans
+        self.player2 = minmax.HumanPlayer()
 
         # Labels
         Label(self.windows, text = "Othello Board", font = "Helvetica 16 bold")
@@ -117,7 +119,7 @@ class game_manager():
         self.win_manager.title("SETTINGS")
 
         # List choices :
-        CHOICE = ["Human", "Random", "MinMax", "Alpha-Beta", "MCTS"]
+        CHOICE = ["Human", "Random", "MinMax", "Alpha-Beta", "Dummy"]
         SIMULATION = [10, 20, 30, 40, 50]
 
         # PLAYER
@@ -206,11 +208,16 @@ class game_manager():
         """
         options = self.playerchoice1.get()
         if options == 0:
-            self.player1 = player.HumanPlayer()
+            self.player1 = minmax.HumanPlayer()
         elif options == 1:
-            self.player1 = player.RandomPlayer()
+            self.player1 = minmax.RandomPlayer()
+        elif options == 2:
+            # self.player1 = minmax.MinMax(3)
+            self.player1 = alpha_beta.NegaMax(2)
+        elif options == 3:
+            self.player1 = alpha_beta.Alpha_Beta(2)
         else :
-            self.player1 = player.dummy_evaluation_player() # Still in progress : just minmax for the moment
+            self.player1 = minmax.dummy_evaluation_player() # Still in progress : just minmax for the moment
         self.setup_player()
         self.restart()
 
@@ -222,11 +229,16 @@ class game_manager():
         """
         options = self.playerchoice2.get()
         if options == 0:
-            self.player2 = player.HumanPlayer()
+            self.player2 = minmax.HumanPlayer()
         elif options == 1:
-            self.player2 = player.RandomPlayer()
+            self.player2 = minmax.RandomPlayer()
+        elif options == 2:
+            # self.player2 = minmax.MinMax(3)
+            self.player2 = alpha_beta.NegaMax(2)
+        elif options == 3:
+            self.player2 = alpha_beta.Alpha_Beta(2)
         else :
-            self.player2 = player.DensityMinMax(depth = 3) # Still in progress : just minmax for the moment
+            self.player2 = minmax.dummy_evaluation_player(depth = 3) # Still in progress : just minmax for the moment
         self.setup_player()
         self.restart()
 
