@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import messagebox
 import minmax
 import alpha_beta
+import MCTS_auguste
 import tkinter.ttk as ttk
 import datetime
 import numpy as np
@@ -23,6 +24,7 @@ class simulation():
         self.side = side
         self.game = Othello(board)
         self.moves = self.game.possible_moves(self.side)
+        MCTS_auguste.MCTS(self)
 
     def play_one_turn(self, x : int , y: int) -> None:
         """
@@ -120,7 +122,7 @@ class game_manager():
 
         # List choices :
         CHOICE = ["Human", "Random", "MinMax", "Alpha-Beta", "Dummy"]
-        SIMULATION = [10, 20, 30, 40, 50]
+        SIMULATION = [1 ,10, 20, 30, 40, 50]
 
         # PLAYER
         ### PLayer 1
@@ -212,10 +214,10 @@ class game_manager():
         elif options == 1:
             self.player1 = minmax.RandomPlayer()
         elif options == 2:
-            # self.player1 = minmax.MinMax(3)
-            self.player1 = alpha_beta.Alpha_Beta(4)
+            self.player1 = minmax.MinMax(3)
+            # self.player1 = alpha_beta.Alpha_Beta(4)
         elif options == 3:
-            self.player1 = alpha_beta.PrincipalVariationSearch(4)
+            self.player1 = alpha_beta.failsoft(3)
         else :
             self.player1 = minmax.dummy_evaluation_player() # Still in progress : just minmax for the moment
         self.setup_player()
@@ -233,10 +235,10 @@ class game_manager():
         elif options == 1:
             self.player2 = minmax.RandomPlayer()
         elif options == 2:
-            # self.player2 = minmax.MinMax(3)
-            self.player2 = alpha_beta.Alpha_Beta(4)
+            self.player2 = minmax.MinMax(3)
+            # self.player2 = alpha_beta.Alpha_Beta(4)
         elif options == 3:
-            self.player2 = alpha_beta.PrincipalVariationSearch(4)
+            self.player2 = alpha_beta.Alpha_Beta(3)
         else :
             self.player2 = minmax.dummy_evaluation_player(depth = 3) # Still in progress : just minmax for the moment
         self.setup_player()

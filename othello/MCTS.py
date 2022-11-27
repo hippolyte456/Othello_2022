@@ -7,7 +7,7 @@ class MCTSNode(object):
         self.game_state = game_state
         self.nextPlayer = nextPlayer
         self.parent = parent
-        self.move = move
+        self.move = move # Parent's move that generated the child
         self.win_counts = 0 # anciennement {Player.black: 0, Player.white: 0,}
         self.num_rollouts = 0
         self.children = []
@@ -17,8 +17,8 @@ class MCTSNode(object):
         index = rd.randint(0, len(self.unvisited_moves) - 1)
         new_move = self.unvisited_moves.pop(index)
         new_game_state = self.game_state.play_move(new_move[0], new_move[1], self.nextPlayer)
-        new_nextPlayer = - self.nextPlayer
-        new_node = MCTSNode(new_game_state, new_nextPlayer, self, new_move)
+        new_nextPlayer = - self.nextPlayer # Nop, be carefull next player is not always -self.nextPLayer you should prefer to get the self.new_game.side
+        new_node = MCTSNode(new_game_state, new_nextPlayer, self, new_move) # Be carefull if you send new_game_state like this you will modify it in the child and when you will come back the modification will stay you can undo the move to prevent this
         self.children.append(new_node)
         return new_node
 
