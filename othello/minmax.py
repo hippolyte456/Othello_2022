@@ -1,7 +1,7 @@
 from copy import deepcopy, copy
 from run import simulation
 from math import *
-import random
+from random import choice
 import numpy as np
 import evaluation
 
@@ -13,10 +13,12 @@ class RandomPlayer():
     
     def __init__(self) :
         self.auto = True # Inform about that it is a automatic player
+        self.name = "randomplayer"
 
     def pick_move(self, game) -> list:
-        r = random.randint(0, len(game.moves)-1)
-        return (game.moves[r][0], game.moves[r][1])
+        # print(game.game.board)
+        move = choice(game.moves)
+        return (move[0], move[1])
     
 class HumanPlayer(): 
     """

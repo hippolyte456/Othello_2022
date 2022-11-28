@@ -146,6 +146,7 @@ def full_evaluation(game, maximizingplayer, x = -1, y = -1) -> int:
         mobility_value = 0
     
     return ((10 * coin_value) + (801.724 * corner_value) + (382.026 * corner_nearess_value) + (78.922 * mobility_value) + (74.396 * front_value) + (10 * density_value))
+# Inspired from https://github.com/kartikkukreja/blog-codes/blob/master/src/Heuristic%20Function%20for%20Reversi%20(Othello).cpp
 
 def check_neighborhood(game, i : int, j : int) -> int:
     # self.density_map = np.array([[20 , -3, 11, 8, 8, 11, -3, 20],

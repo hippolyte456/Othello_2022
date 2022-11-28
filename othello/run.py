@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import messagebox
 import minmax
 import alpha_beta
-import MCTS_auguste
+import MCTS
 import tkinter.ttk as ttk
 import datetime
 import numpy as np
@@ -24,7 +24,9 @@ class simulation():
         self.side = side
         self.game = Othello(board)
         self.moves = self.game.possible_moves(self.side)
-        MCTS_auguste.MCTS(self)
+        if self.moves == []:
+            self.side = -self.side
+            self.moves = self.game.possible_moves(self.side)
 
     def play_one_turn(self, x : int , y: int) -> None:
         """
@@ -121,7 +123,7 @@ class game_manager():
         self.win_manager.title("SETTINGS")
 
         # List choices :
-        CHOICE = ["Human", "Random", "MinMax", "Alpha-Beta", "Dummy"]
+        CHOICE = ["Human", "Random", "MinMax", "Alpha-Beta", "Dummy", "MCTS"]
         SIMULATION = [1 ,10, 20, 30, 40, 50]
 
         # PLAYER
@@ -179,6 +181,7 @@ class game_manager():
             Input : Number of simulation choose by the user
             Output : Display result on the Manager Windows
         """
+        self.restart()
         self.now = datetime.datetime.now()
         options = self.nb_simu.get()
         cpt_black, cpt_white, equality = 0, 0, 0
@@ -218,8 +221,10 @@ class game_manager():
             # self.player1 = alpha_beta.Alpha_Beta(4)
         elif options == 3:
             self.player1 = alpha_beta.failsoft(3)
-        else :
+        elif options == 4:
             self.player1 = minmax.dummy_evaluation_player() # Still in progress : just minmax for the moment
+        elif options == 5:
+            self.player1 = MCTS.MCTS(self)
         self.setup_player()
         self.restart()
 
@@ -239,8 +244,10 @@ class game_manager():
             # self.player2 = alpha_beta.Alpha_Beta(4)
         elif options == 3:
             self.player2 = alpha_beta.Alpha_Beta(3)
-        else :
+        elif options == 4:
             self.player2 = minmax.dummy_evaluation_player(depth = 3) # Still in progress : just minmax for the moment
+        elif options == 5:
+            self.player2 = MCTS.MCTS(self)
         self.setup_player()
         self.restart()
 
@@ -279,10 +286,14 @@ class game_manager():
         Pause the game
         """
         self.stop = False if self.stop else True
-
+        # if the user want to restart 
+        if self.game.game_over() :
+            self.restart()
+            self.stop = False
+        # If the user want to stop
         if not self.stop :
             if self.human :
-                if self.players[0].auto :
+                if self.players[0 if self.side == 1 else 1].auto :
                     self.play_turn()
                     self.moves = self.game.possible_moves(self.side) # show legal move for next player
                     self.game.display_legal_moves(self.moves, self.canva)
