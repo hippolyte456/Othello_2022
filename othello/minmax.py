@@ -13,7 +13,7 @@ class RandomPlayer():
     
     def __init__(self) :
         self.auto = True # Inform about that it is a automatic player
-        self.name = "randomplayer"
+        self.name = "Random"
 
     def pick_move(self, game) -> list:
         # print(game.game.board)
@@ -28,6 +28,7 @@ class HumanPlayer():
     
     def __init__(self) :
         self.auto = False # Inform that it is not a automatic player
+        self.name = "Human"
 
     def move_from_tkinter(self, game : object, side : int, event : enumerate, size : int) -> list:
         t = game.possible_moves(side)
@@ -54,6 +55,7 @@ class dummy_evaluation_player():
     def __init__(self, depth = 1):
         self.depth = depth
         self.auto = True
+        self.name = "Dummy"
 
     def pick_move(self, game) -> list :
         self.density_map = np.array([[120,-20,20,5,5,20,-20,120],
@@ -109,6 +111,7 @@ class MinMax():
     def __init__(self, depth : int = 2) -> None:
         self.depth = depth    
         self.auto = True
+        self.name = "MinMax"
 
     def pick_move(self, game) -> tuple :
         newgame = simulation(game.players[0],game.players[1], deepcopy(game.game.board), game.side)

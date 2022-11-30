@@ -6,6 +6,7 @@ class Alpha_Beta():
     def __init__(self, depth : int = 2) -> None:
         self.depth = depth    
         self.auto = True
+        self.name = "Alpha-Beta"
 
     def pick_move(self, game) -> tuple :
         newgame = run.simulation(game.players[0],game.players[1], game.game.board, game.side)
@@ -56,6 +57,7 @@ class NegaMax():
     def __init__(self, depth : int = 2) -> None:
         self.depth = depth    
         self.auto = True
+        self.name = "NegaMax"
 
     def pick_move(self, game) -> tuple :
         newgame = run.simulation(game.players[0],game.players[1], game.game.board, game.side)
@@ -90,8 +92,9 @@ class failsoft():
         - if beta <= current then the true minimax value m verifies : beta <= current <= m
     """
     def __init__(self, depth : int = 2) -> None:
-        self.depth = depth    
-        self.auto = True
+        self.depth  = depth    
+        self.auto   = True
+        self.name   = "Failsoft"
 
     def pick_move(self, game) -> tuple :
         newgame = run.simulation(game.players[0],game.players[1], game.game.board, game.side)
@@ -130,8 +133,9 @@ class PrincipalVariationSearch():
     10 % faster than classical alpha-beta on depth 4 (non linear when increasing depth)
     """
     def __init__(self, depth : int = 2) -> None:
-        self.depth = depth    
-        self.auto = True
+        self.depth  = depth    
+        self.auto   = True
+        self.name   = " PVS"
 
     def pick_move(self, game) -> tuple :
         newgame = run.simulation(game.players[0],game.players[1], game.game.board, game.side)

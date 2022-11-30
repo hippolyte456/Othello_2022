@@ -7,6 +7,8 @@ import MCTS
 import tkinter.ttk as ttk
 import datetime
 import numpy as np
+import csv
+import os
 
 class simulation():
     """
@@ -24,6 +26,7 @@ class simulation():
         self.side = side
         self.game = Othello(board)
         self.moves = self.game.possible_moves(self.side)
+        self.lst_moves = [] # For statistics
         if self.moves == []:
             self.side = -self.side
             self.moves = self.game.possible_moves(self.side)
@@ -50,6 +53,18 @@ class simulation():
             self.play_one_turn(x, y) # Play one turn
             if self.moves == [] : # If no more moves = end of game
                 return (np.sum(self.game.board)) # Return sum of the board
+
+    def play_stat(self) -> int:
+        """
+        Play the whole game until someone wins
+        Output : Sum of the board (representing the winner) + list of moves (associated with side)
+        """
+        while (-1): # Until the end of the game
+            x, y = self.players[0 if self.side == 1 else 1].pick_move(self) # Get choice
+            self.lst_moves.append(((x, y), self.side))
+            self.play_one_turn(x, y) # Play one turn
+            if self.moves == [] : # If no more moves = end of game
+                return (np.sum(self.game.board), self.lst_moves) # Return sum of the board + lst
 
 class game_manager():
     """
@@ -124,7 +139,7 @@ class game_manager():
 
         # List choices :
         CHOICE = ["Human", "Random", "MinMax", "Alpha-Beta", "Dummy", "MCTS"]
-        SIMULATION = [1 ,10, 20, 30, 40, 50]
+        SIMULATION = [1 ,10, 30, 50, 100, 300]
 
         # PLAYER
         ### PLayer 1
@@ -166,15 +181,98 @@ class game_manager():
 
         self.nb_simu = IntVar() #IntVar()
         for i, label in enumerate(SIMULATION):
-            ttk.Radiobutton(self.win_manager, text=label, value=label, variable=self.nb_simu
-                            , command=self.get_simu).grid(column = i + 1, row = 13)
-        
-        Label(self.win_manager, text=" ", font=("Arial 17 bold")).grid(column = 0, row = 14)
+            ttk.Radiobutton(self.win_manager, text=label, value=label, variable=self.nb_simu).grid(column = i + 1, row = 13)
+        Button(self.win_manager, text="Launch", command = self.get_simu
+                , bg = "purple", fg = 'white').grid(column=0, row = 16, columnspan=1)
+        Label(self.win_manager, text=" ", font=("Arial 17 bold")).grid(column = 0, row = 17)
+
+        # STATISTICS
+        Label(self.win_manager, text="Statistics", font=("Arial 17 bold")).grid(column = 0, row = 18)
+        Label(self.win_manager, text="Player 1", font=("bold")).grid(column=2, row=19)    
+        Label(self.win_manager, text="Player 2", font=("bold")).grid(column=4, row=19)        
+        Label(self.win_manager, text="UCB").grid(column=0, row=20)    
+        Label(self.win_manager, text="Iteration").grid(column=0, row=21)
+        Label(self.win_manager, text="Threshold").grid(column=0, row=22)
+        Label(self.win_manager, text="Depth").grid(column=0, row=23)
+
+        ## Variables
+        self.UCB1 = DoubleVar()
+        self.UCB1.set(0.14)  
+        Scale(self.win_manager, variable = self.UCB1, from_ = 0, to = 1, resolution = 0.01, orient = HORIZONTAL).grid(column=2, row=20)
+        self.UCB2 = DoubleVar()
+        self.UCB2.set(0.14)  
+        Scale(self.win_manager, variable = self.UCB2, from_ = 0, to = 1, resolution = 0.01, orient = HORIZONTAL).grid(column=4, row=20)
+        self.it1 = DoubleVar()
+        self.it1.set(20)  
+        Scale(self.win_manager, variable = self.it1, from_ = 10, to = 100, resolution = 5, orient = HORIZONTAL).grid(column=2, row=21)
+        self.it2 = DoubleVar()
+        self.it2.set(20)  
+        Scale(self.win_manager, variable = self.it2, from_ = 10, to = 100, resolution = 5, orient = HORIZONTAL).grid(column=4, row=21)
+        self.th1 = DoubleVar()
+        self.th1.set(10)  
+        Scale(self.win_manager, variable = self.th1, from_ = 2, to = 30, resolution = 2, orient = HORIZONTAL).grid(column=2, row=22)
+        self.th2 = DoubleVar()
+        self.th2.set(10)  
+        Scale(self.win_manager, variable = self.th2, from_ = 2, to = 30, resolution = 2, orient = HORIZONTAL).grid(column=4, row=22)
+        self.depth1 = DoubleVar()
+        self.depth1.set(3)  
+        Scale(self.win_manager, variable = self.depth1, from_ = 1, to = 10, resolution = 1, orient = HORIZONTAL).grid(column=2, row=23)
+        self.depth2 = DoubleVar()
+        self.depth2.set(3)  
+        Scale(self.win_manager, variable = self.depth2, from_ = 1, to = 10, resolution = 1, orient = HORIZONTAL).grid(column=4, row=23)
+
+        Button(self.win_manager, text="Export", command = self.statistics
+                , bg = "purple", fg = 'white').grid(column=3, row = 25, columnspan=1)
+        Label(self.win_manager, text=" ", font=("Arial 17 bold")).grid(column = 0, row = 24)
 
 
         # LOCALISATION
-        self.win_manager.geometry('%dx%d+%d+%d' % (570, 250, self.ws, 0))
+        self.win_manager.geometry('%dx%d+%d+%d' % (620, 500, self.ws, 0))
 
+    def statistics(self) -> None:
+        """
+        Generate an file with the follow column:
+        Player 1 | Player 2 | List moves | Score | UCB 1 | UCB 2 | it 1 | it 2 | th 1 | th 2 | depth 1 | depth 2
+        Player      = player type (random, human, minmax, alpha-beta, MCTS)
+        Score       = np.sum of the board
+        UCB, it, Th = Params of MCTS
+        Depth       = Params of MinMAx / Alpha-Beta
+        """
+        self.restart() # Clean previous options
+        if not self.player1.auto and not self.player2.auto : # Doesn't work for human yet
+            return
+        Label = ["Player 1", "PLayer 2", "Liste Moves", "Score", "UCB 1", "UCB2", "it 1", "it 2", "th 1", "th 2", "depth 1", "depth 2"]
+        
+        if not os.path.exists('./data_othello.csv'):
+            file = open('data_othello.csv', 'w')
+            writer = csv.writer(file)
+            writer.writerow(Label) # Add labels to file
+        else :
+            file = open('data_othello.csv', 'a')
+            writer = csv.writer(file)
+
+        # Define the variables 
+        if self.player1.name == "MCTS" :
+            self.player1.threshold = self.th1.get()
+            self.player1.iteration = self.it1.get()
+            self.player1.c = self.UCB1.get()
+        elif self.player1 != "Random" :
+            self.player1.depth = self.depth1.get()
+        if self.player2.name == "MCTS" :
+            self.player2.threshold = self.th2.get()
+            self.player2.iteration = self.it2.get()
+            self.player2.c = self.UCB2.get()
+        elif self.player2 != "Random" :
+            self.player2.depth = self.depth2.get()
+        
+        options = self.nb_simu.get() # Size of sumilation we want
+        while options :
+            result = simulation(self.player1, self.player2, np.zeros((8, 8), dtype=int), self.side).play_stat()
+            l_row = [self.player1.name, self.player2.name, result[1], result[0], self.UCB1.get(), self.UCB2.get()
+                , self.it1.get(), self.it2.get(), self.th1.get(), self.th2.get(), self.depth1.get(), self.depth2.get()]
+            writer.writerow(l_row) # Add row to file
+            options -= 1
+        
     def get_simu(self) -> None:
         """
         Launch the right number of simulation
@@ -353,4 +451,3 @@ class game_manager():
 
 if __name__ == '__main__':
     game_manager()
-   

@@ -1,4 +1,3 @@
-
 from math import *
 from copy import deepcopy
 import run
@@ -25,13 +24,14 @@ class MCTS():
     Class for MCTS Algorithm
     """
 
-    def __init__(self, game : object = None, c : int = 0.1416, threshold : int = 30, iteration : int = 100) -> None:
+    def __init__(self, game : object = None, c : int = 0.1416, threshold : int = 2, iteration : int = 20) -> None:
         """
         Init all the variable for MCTS
         """
         self.auto = True # Inform that it is an automatic player
+        self.name = "MCTS"
         self.player = game.side # Will be use to know if the result of MCTS is a win or not
-        self.c = c # Parameter of MCTS formula
+        self.c = c # Parameter of MCTS formula : UCB upper confidence bound
         self.threshold = threshold
         self.iteration = iteration
         self.init = node(game.game.board) # Root
