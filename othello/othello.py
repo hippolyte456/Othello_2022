@@ -8,10 +8,10 @@ class Othello(object):
     def __init__(self, board : int = np.zeros((8, 8), dtype=int)):
         self.board = board
         if not 1 in self.board : # If it is a not an emty board
-            self.board[3, 3] = 1
-            self.board[3, 4] = -1
-            self.board[4, 3] = -1
-            self.board[4, 4] = 1
+            self.board[3, 3] = -1
+            self.board[3, 4] = 1
+            self.board[4, 3] = 1
+            self.board[4, 4] = -1
     
     def unmake_move(self, fliped, x : int, y : int,  side : int) -> int:
         """
@@ -21,6 +21,9 @@ class Othello(object):
         self.board[x, y] = 0
         for tx, ty in fliped :
             self.board[tx,ty] = -self.board[tx,ty]
+        moves = self.possible_moves(-side)
+        if moves == [] :
+            return side
         return -side
 
     def play_move(self, x : int, y : int, side : int) -> None:
@@ -55,18 +58,24 @@ class Othello(object):
         """
         return list (xi, yi) of possible moves
         """
-        return [(i, j) for i in range(8) for j in range(8) if self.board[i,j] == 0 and self.valid_flip(i,j, side)]
-    
+        moves = []
+        for i in range(8):
+            for j in range(8):
+                if self.board[i,j] == 0 and self.valid_flip(i,j, side):
+                    moves.append((i, j))
+        return moves    
+
     def valid_flip(self, x : int, y : int, side : int) -> bool:
         """
         For each flip check if it is a valid move
         """
         for dx in range(-1, 2):
             for dy in range(-1, 2):
-                if dy == 0 and dx == 0:
-                    continue
-                if(self.valid_ray(x, y, side, dx, dy)):
-                    return True
+                if 0 <= (x + dx) < 8 and 0 <= (y + dy) < 8 :
+                    if (dy == 0 and dx == 0) or self.board[x + dx, y + dy] == 0:
+                        continue
+                    if(self.valid_ray(x, y, side, dx, dy)): # Pas besoin de tout tester quand self.board[i,j] = 0
+                        return True
         return False
     
     def valid_ray(self, x : int, y : int, side : int, dx : int, dy : int) -> bool:
