@@ -12,6 +12,10 @@ Project of the Master IODAA - AgroParisTech & University Paris-Saclay realized b
 
 The objective is to recode a complete othello game and to design algorithms to solve it
 
+### Reuse of code 
+
+Architecture of the Othello game itself in this project is largely inspired by
+ <a href="https://github.com/bhansconnect/alpha_zero_othello.git" target="_blank">this repository </a> <br>
 ### Othello History
 
 Othello belongs to the class of strategy games with two players, with complete information (the players know at each moment the totality of the information on the position they have to play) and with zero sum (at the end of the game, the totality of the stake, i.e. 64 pawns, is distributed entirely between the players).
