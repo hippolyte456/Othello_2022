@@ -47,15 +47,7 @@ class simulation():
         """
         while (-1): # Until the end of the game
             x, y = self.players[0 if self.side == 1 else 1].pick_move(self) # Get choice
-            if (x,y) not in self.moves:
-            #     print(self.game.board)
-            #     self.players[0 if self.side == 1 else 1].display_tree()
-                print("There is a error in x,y", (x, y), self.side, self.moves) # Check if is a legal move (to remove)
-            if (x,y) in self.moves:
-                self.play_one_turn(x, y) # Play one turn
-            else :
-                print("Random choice")
-                self.play_one_turn(self.moves[0][0], self.moves[0][1]) # SHOULD NOT PLAY RANDOM but here as a saftguard
+            self.play_one_turn(x, y) # Play one turn
             if self.moves == [] : # If no more moves = end of game
                 return (np.sum(self.game.board)) # Return sum of the board
 
