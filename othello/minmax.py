@@ -123,18 +123,6 @@ class MinMax():
             return evaluation.full_evaluation(game, maximizingplayer, x, y), (-1, -1)
         
         if game.side == maximizingplayer :
-            value = 1000000000
-            Bmove = (-1,-1)   
-            for move in game.moves :
-                game.play_one_turn(move[0], move[1])
-                fliped = game.game.fliped
-                yMM = self.minmax(game, depth-1, maximizingplayer, move[0], move[1])
-                game.side = game.game.unmake_move(fliped, move[0], move[1], game.side)
-                gain, _ = yMM[0], yMM[1]
-                if gain < value :
-                    value = gain
-                    Bmove = move
-        else :
             value = -1000000000
             Bmove = (-1,-1)   
             for move in game.moves :
@@ -144,6 +132,18 @@ class MinMax():
                 game.side = game.game.unmake_move(fliped, move[0], move[1], game.side)
                 gain, _ = yMM[0], yMM[1]
                 if gain > value :
+                    value = gain
+                    Bmove = move
+        else :
+            value = 1000000000
+            Bmove = (-1,-1)   
+            for move in game.moves :
+                game.play_one_turn(move[0], move[1])
+                fliped = game.game.fliped
+                yMM = self.minmax(game, depth-1, maximizingplayer, move[0], move[1])
+                game.side = game.game.unmake_move(fliped, move[0], move[1], game.side)
+                gain, _ = yMM[0], yMM[1]
+                if gain < value :
                     value = gain
                     Bmove = move
         

@@ -315,12 +315,11 @@ class game_manager():
         elif options == 1:
             self.player1 = minmax.RandomPlayer()
         elif options == 2:
-            self.player1 = minmax.MinMax(1)
-            # self.player1 = alpha_beta.Alpha_Beta(4)
+            self.player1 = minmax.MinMax(self.depth1.get())
         elif options == 3:
-            self.player1 = alpha_beta.failsoft(3)
+            self.player1 = alpha_beta.failsoft(self.depth1.get())
         elif options == 4:
-            self.player1 = minmax.dummy_evaluation_player() # Still in progress : just minmax for the moment
+            self.player1 = minmax.dummy_evaluation_player()
         elif options == 5:
             self.player1 = MCTS.MCTS(self, side = 1)
         self.setup_player()
@@ -338,12 +337,11 @@ class game_manager():
         elif options == 1:
             self.player2 = minmax.RandomPlayer()
         elif options == 2:
-            self.player2 = minmax.MinMax(3)
-            # self.player2 = alpha_beta.Alpha_Beta(4)
+            self.player2 = minmax.MinMax(self.depth2.get())
         elif options == 3:
-            self.player2 = alpha_beta.failsoft(3)
+            self.player2 = alpha_beta.failsoft(self.depth2.get())
         elif options == 4:
-            self.player2 = minmax.dummy_evaluation_player(depth = 3) # Still in progress : just minmax for the moment
+            self.player2 = minmax.dummy_evaluation_player(depth = 3)
         elif options == 5:
             self.player2 = MCTS.MCTS(self, side = -1)
         self.setup_player()
