@@ -58,14 +58,14 @@ class dummy_evaluation_player():
         self.name = "Dummy"
 
     def pick_move(self, game) -> list :
-        self.density_map = np.array([[120,-20,20,5,5,20,-20,120],
-                       [-20,-30,-5,-5,-5,-5,-30,-20],
-                       [20 ,-5 ,15,3,3,15,-5,20],
-                       [5  ,-5 ,3,3,3,3,-5,5],
-                       [5  ,-5 ,3,3,3,3,-5,5],
-                       [20 ,-5 ,15,3,3,15,-5,20],
-                       [-20,-30,-5,-5,-5,-5,-30,-20],
-                       [120,-20,20,5,5,20,-20,120]])
+        self.density_map = np.array([[120, -20, 20, 5 , 5,20,-20,120],
+                                     [-20, -30, -5, -5, -5,-5,-30,-20],
+                                     [20 , -5 , 15, 3 , 3,15,-5,20],
+                                     [5  , -5 , 3 , 3 , 3,3,-5,5],
+                                     [5  , -5 , 3 , 3 , 3,3,-5,5],
+                                     [20 , -5 , 15, 3 , 3,15,-5,20],
+                                     [-20, -30, -5, -5, -5,-5,-30,-20],
+                                     [120, -20, 20, 5 , 5,20,-20,120]])
         ret = -10000
         for move in game.moves:
             new_game = simulation(deepcopy(game.players[0]),deepcopy(game.players[1]), deepcopy(game.game.board), game.side)
@@ -113,12 +113,12 @@ class MinMax():
         self.auto = True
         self.name = "MinMax"
 
-    def pick_move(self, game) -> tuple :
-        newgame = simulation(game.players[0],game.players[1], deepcopy(game.game.board), game.side)
-        gain, move = self.minmax(newgame, self.depth, game.side)
+    def pick_move(self, game : object) -> tuple :
+        newgame = simulation(game.players[0],game.players[1], deepcopy(game.game.board), deepcopy(game.side))
+        gain, move = self.minmax(newgame, self.depth, deepcopy(game.side))
         return move
 
-    def minmax(self, game, depth : int , maximizingplayer  : int, x : int = -1, y : int = -1) -> tuple :
+    def minmax(self, game : object, depth : int , maximizingplayer  : int, x : int = -1, y : int = -1) -> tuple :
         if depth == 0 or game.moves == [] :
             return evaluation.full_evaluation(game, maximizingplayer, x, y), (-1, -1)
         

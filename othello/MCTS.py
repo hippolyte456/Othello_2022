@@ -24,7 +24,7 @@ class MCTS():
     Class for MCTS Algorithm
     """
 
-    def __init__(self, game : object = None, c : int = 0.1416, threshold : int = 2, iteration : int = 20) -> None:
+    def __init__(self, game : object = None, side : int = -1, c : int = 0.1416, threshold : int = 2, iteration : int = 20) -> None:
         """
         Init all the variable for MCTS
         """
@@ -43,6 +43,7 @@ class MCTS():
         Return the move to play according to MCTS algorithm
         """
         self.Is_New_Game(game) # Check if we want to start a new MCTS simulation
+        self.player = game.side 
         self.Selection(game)                                        # 1. SELECTION
         self.init.n += 1 # Increment the starting position
         iteration = self.iteration

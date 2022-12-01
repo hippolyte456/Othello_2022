@@ -322,7 +322,7 @@ class game_manager():
         elif options == 4:
             self.player1 = minmax.dummy_evaluation_player() # Still in progress : just minmax for the moment
         elif options == 5:
-            self.player1 = MCTS.MCTS(self)
+            self.player1 = MCTS.MCTS(self, side = 1)
         self.setup_player()
         self.restart()
 
@@ -345,7 +345,7 @@ class game_manager():
         elif options == 4:
             self.player2 = minmax.dummy_evaluation_player(depth = 3) # Still in progress : just minmax for the moment
         elif options == 5:
-            self.player2 = MCTS.MCTS(self)
+            self.player2 = MCTS.MCTS(self, side = -1)
         self.setup_player()
         self.restart()
 
