@@ -52,12 +52,15 @@ The MCTS algorithm is an algorithm that explores the tree of possibilities. The 
 
 ###
 
-## Execution
+### Execution
 
-The work is in progress, the algorithms are not yet finished but it is already possible to have a view of the project.
+* To use our program, launch the below command on terminal.
 
 ```bash
 python3 othello/run.py 
 ```
+* To see statistics generated playing with the created algorithms, please see the analyse.ipynb file. 
+Images with more simulation are available in the 'images' folders.
+
 
 For the Graphical User Interfaces (GUIs) we used Tkinter.
