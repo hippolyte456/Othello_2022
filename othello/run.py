@@ -210,10 +210,10 @@ class game_manager():
         Scale(self.win_manager, variable = self.it2, from_ = 10, to = 100, resolution = 5, orient = HORIZONTAL).grid(column=4, row=21)
         self.th1 = DoubleVar()
         self.th1.set(10)  
-        Scale(self.win_manager, variable = self.th1, from_ = 2, to = 30, resolution = 2, orient = HORIZONTAL).grid(column=2, row=22)
+        Scale(self.win_manager, variable = self.th1, from_ = 2, to = 30, resolution = 1, orient = HORIZONTAL).grid(column=2, row=22)
         self.th2 = DoubleVar()
         self.th2.set(10)  
-        Scale(self.win_manager, variable = self.th2, from_ = 2, to = 30, resolution = 2, orient = HORIZONTAL).grid(column=4, row=22)
+        Scale(self.win_manager, variable = self.th2, from_ = 2, to = 30, resolution = 1, orient = HORIZONTAL).grid(column=4, row=22)
         self.depth1 = DoubleVar()
         self.depth1.set(3)  
         Scale(self.win_manager, variable = self.depth1, from_ = 1, to = 10, resolution = 1, orient = HORIZONTAL).grid(column=2, row=23)
@@ -321,7 +321,7 @@ class game_manager():
         elif options == 4:
             self.player1 = minmax.dummy_evaluation_player()
         elif options == 5:
-            self.player1 = MCTS.MCTS(self, side = 1)
+            self.player1 = MCTS.MCTS(self, side = 1, c = self.UCB1.get(), threshold = self.th1.get(), iteration=self.it1.get())
         self.setup_player()
         self.restart()
 
@@ -343,7 +343,7 @@ class game_manager():
         elif options == 4:
             self.player2 = minmax.dummy_evaluation_player(depth = 3)
         elif options == 5:
-            self.player2 = MCTS.MCTS(self, side = -1)
+            self.player2 = MCTS.MCTS(self, side = -1, c = self.UCB2.get(), threshold = self.th2.get(), iteration=self.it2.get())
         self.setup_player()
         self.restart()
 
